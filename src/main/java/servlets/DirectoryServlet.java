@@ -1,7 +1,6 @@
 package servlets;
 
 import model.MyFile;
-import model.UserProfile;
 import service.AccountService;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -14,17 +13,24 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DirectoryServlet extends HttpServlet{
+
+    AccountService accountService = new AccountService();
+
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
         resp.setContentType("text/html");
-        String sessionId = req.getSession().getId();
-        UserProfile profile = AccountService.getUserBySessionId(sessionId);
         String path = req.getParameter("path");
-        if (profile == null){
+        String sessionId = req.getSession().getId();
+        String login;
+
+        if(!accountService.CheckSessionId(sessionId)){
             req.getRequestDispatcher("/log.html").forward(req, resp);
             return;
         }
-        if (path.contains("C:\\Users\\"+profile.getLogin())){
+        else{
+            login = accountService.getLoginBySessionId(sessionId);
+        }
+        if (path.contains("C:\\Users\\"+login)){
             MyFile file = new MyFile(Paths.get(path));
             if (file.isDirectory()) {
                 req.setAttribute("dateTimeNow", new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date()));
@@ -48,8 +54,8 @@ public class DirectoryServlet extends HttpServlet{
                 out.close();
             }
         }
-        else{
-            req.setAttribute("path", "C:\\Users\\"+profile.getLogin());
+        else {
+            req.setAttribute("path", "C:\\Users\\"+login);
             req.getRequestDispatcher("/warning.html").forward(req, resp);
         }
     }

@@ -1,32 +1,63 @@
 package service;
 
-import model.UserProfile;
+import dbService.DBException;
+import dbService.DBService;
+import dbService.dataSets.UsersDataSet;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AccountService {
-    private static final Map<String, UserProfile> loginToProfile = new HashMap<>();
-    private static final Map<String, UserProfile> sessionIdToProfile = new HashMap<>();
+private static Map<String, UsersDataSet> sessionBase = new HashMap<>();
+    private DBService base = new DBService();
 
-    public static void addNewUser(UserProfile userProfile) {
-        if(!loginToProfile.containsKey(userProfile))
-            loginToProfile.put(userProfile.getLogin(), userProfile);
+    public AccountService(){
     }
 
-    public static UserProfile getUserByLogin(String login) {
-        return loginToProfile.get(login);
+    public boolean AddNewUser(String login, String password, String email) {
+        UsersDataSet user = new UsersDataSet(login, password, email);
+        if (base.getUser(login) != null){
+            return false;
+        }
+        try {
+            base.addUser(user.getLogin(), user.getPass(), user.getEmail());
+        }
+        catch(SQLException e) {return false;}
+        return true;
     }
 
-    public static UserProfile getUserBySessionId(String sessionId) {
-        return sessionIdToProfile.get(sessionId);
+    public boolean FindUser(String login){
+        return base.getUser(login) == null;
     }
 
-    public static void addSession(String sessionId, UserProfile userProfile) {
-        sessionIdToProfile.put(sessionId, userProfile);
+    public boolean AuthorizateUser(UsersDataSet authProfile, String sessionID){
+        UsersDataSet baseProfile = base.getUser(authProfile.getLogin());
+        if(baseProfile != null){
+            if(baseProfile.getPass().compareTo(authProfile.getPass()) == 0){
+                sessionBase.put(sessionID, baseProfile);
+                return true;
+            }
+            return false;
+        }
+        return false;
     }
 
-    public static void deleteSession(String sessionId) {
-        sessionIdToProfile.remove(sessionId);
+    public String getLoginBySessionId(String sessionID){
+        if(sessionBase.containsKey(sessionID)){
+            return sessionBase.get(sessionID).getLogin();
+        }
+        return null;
+    }
+    public boolean CheckSessionId(String sessionID){
+        return sessionBase.containsKey(sessionID);
+    }
+
+    public boolean Quit(String sessionID){
+        if(sessionBase.containsKey(sessionID)){
+            sessionBase.remove(sessionID);
+            return true;
+        }
+        return false;
     }
 }
