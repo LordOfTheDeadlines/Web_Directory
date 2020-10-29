@@ -12,7 +12,7 @@ import java.io.IOException;
 @WebServlet("/registration")
 public class RegistrationServlet extends HttpServlet  {
 
-AccountService accountService = new AccountService();
+    AccountService accountService = new AccountService();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
@@ -23,14 +23,15 @@ AccountService accountService = new AccountService();
             req.getRequestDispatcher("/registration").forward(req, resp);
             return;
         }
+        System.out.println(login+pass+email);
         if(accountService.AddNewUser(login, pass, email)){
             File file = new File("C:\\Users\\"+login);
             file.mkdirs();
-            String path = "http://localhost:8888/?path=C:\\Users\\"+login+"/";
+            String path = "/?path=C:\\Users\\"+login+"/";
             resp.sendRedirect(path);
         }
         else {
-            resp.getWriter().println("Ой о.о");
+            resp.getWriter().println("User with such login has already exist");
         }
     }
 }

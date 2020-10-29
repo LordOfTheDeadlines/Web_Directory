@@ -12,10 +12,12 @@ public class Executor {
         this.connection = connection;
     }
 
-    public void execUpdate(String update) throws SQLException {
+    public int execUpdate(String update) throws SQLException {
         Statement stmt = connection.createStatement();
         stmt.execute(update);
+        int updated = stmt.getUpdateCount();
         stmt.close();
+        return updated;
     }
 
     public <T> T execQuery(String query, ResultHandler<T> handler) throws SQLException {

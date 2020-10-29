@@ -1,15 +1,14 @@
 package service;
 
-import dbService.DBException;
 import dbService.DBService;
 import dbService.dataSets.UsersDataSet;
+import org.hibernate.HibernateException;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AccountService {
-private static Map<String, UsersDataSet> sessionBase = new HashMap<>();
+    private static Map<String, UsersDataSet> sessionBase = new HashMap<>();
     private DBService base = new DBService();
 
     public AccountService(){
@@ -17,13 +16,12 @@ private static Map<String, UsersDataSet> sessionBase = new HashMap<>();
 
     public boolean AddNewUser(String login, String password, String email) {
         UsersDataSet user = new UsersDataSet(login, password, email);
-        if (base.getUser(login) != null){
+        if (base.getUser(login) != null)
             return false;
-        }
         try {
             base.addUser(user.getLogin(), user.getPass(), user.getEmail());
         }
-        catch(SQLException e) {return false;}
+        catch(HibernateException e) {return false;}
         return true;
     }
 
@@ -33,13 +31,11 @@ private static Map<String, UsersDataSet> sessionBase = new HashMap<>();
 
     public boolean AuthorizateUser(UsersDataSet authProfile, String sessionID){
         UsersDataSet baseProfile = base.getUser(authProfile.getLogin());
-        if(baseProfile != null){
+        if(baseProfile != null)
             if(baseProfile.getPass().compareTo(authProfile.getPass()) == 0){
                 sessionBase.put(sessionID, baseProfile);
                 return true;
             }
-            return false;
-        }
         return false;
     }
 

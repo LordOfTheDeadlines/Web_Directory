@@ -8,10 +8,14 @@ public class UsersDataSet {
     @Id
     @Column(name = "login")
     private String login;
-    @Column(name = "pass")
+    @Column(name = "password")
     private String pass;
     @Column(name = "email")
     private String email;
+
+    public UsersDataSet(){
+
+    }
 
     public UsersDataSet(String login, String pass, String email) {
         this.login = login;
@@ -23,4 +27,3 @@ public class UsersDataSet {
     public String getPass() {return pass;}
     public String getEmail() {return email;}
 }
-
